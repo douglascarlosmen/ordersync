@@ -56,6 +56,16 @@ services:
       - rabbitmq
       - mysql
 
+  notification-service:
+    build: ./notification-service
+    container_name: ordersync-notification-service
+    ports:
+      - "8003:80"
+    volumes:
+      - ./notification-service:/var/www/html
+    depends_on:
+      - rabbitmq
+      - mongodb
 
 volumes:
   mysql_data:
