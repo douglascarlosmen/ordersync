@@ -19,13 +19,22 @@ class ProcessPayments extends Command
 
         $channel->queue_declare('order_created', false, true, false, false);
 
-        $callback = function (AMQPMessage $msg) {
+        $callback = function (AMQPMessage $msg) use ($channel) {
             $order = json_decode($msg->body, true);
 
             Payment::create([
                 'order_id' => $order['id'],
                 'status' => 'paid'
             ]);
+
+            $logMessage = new AMQPMessage(json_encode([
+                'order_id' => $order['id'],
+                'status' => 'paid',
+                'notified_at' => now()->toDateTimeString()
+            ]));
+
+            $channel->queue_declare('payment_completed', false, true, false, false);
+            $channel->basic_publish($logMessage, '', 'payment_completed');
 
             $this->info("Processed payment for order ID {$order['id']}");
         };
