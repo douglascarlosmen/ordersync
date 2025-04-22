@@ -43,7 +43,19 @@ services:
       - ./order-service:/var/www/html
     depends_on:
       - mysql
-      - rabbitmq    
+      - rabbitmq
+
+  payment-service:
+    build: ./payment-service
+    container_name: ordersync-payment-service
+    ports:
+      - "8002:80"
+    volumes:
+      - ./payment-service:/var/www/html
+    depends_on:
+      - rabbitmq
+      - mysql
+
 
 volumes:
   mysql_data:
