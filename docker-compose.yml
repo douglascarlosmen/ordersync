@@ -67,6 +67,19 @@ services:
       - rabbitmq
       - mongodb
 
+  api-gateway:
+    build: ./api-gateway
+    container_name: ordersync-api-gateway
+    ports:
+      - "8000:80"
+    volumes:
+      - ./api-gateway:/var/www/html
+    depends_on:
+      - order-service
+      - payment-service
+    networks:
+      - default
+
 volumes:
   mysql_data:
   mongo_data:
