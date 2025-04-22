@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: ordersync-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ordersync
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  mongodb:
+    image: mongo:6
+    container_name: ordersync-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ordersync-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # interface web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  order-service:
+    build: ./order-service
+    container_name: ordersync-order-service
+    ports:
+      - "8001:80"
+    volumes:
+      - ./order-service:/var/www/html
+    depends_on:
+      - mysql
+      - rabbitmq    
+
+volumes:
+  mysql_data:
+  mongo_data:
